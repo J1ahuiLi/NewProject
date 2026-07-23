@@ -1,4 +1,4 @@
-import { _decorator, Component, ResolutionPolicy, screen, Size, view, Node, UITransform } from 'cc';
+import { _decorator, Component, ResolutionPolicy, screen, Size, view, Node, UITransform, Prefab, instantiate, resources, assetManager } from 'cc';
 const { ccclass, property } = _decorator;
 
 /** 
@@ -11,8 +11,6 @@ export const G_VIEW_SIZE = new Size(0, 0);
 @ccclass('Boost')
 export class Boost extends Component {
 
-    @property(Node) private match3Node: Node = null;
-
     start() {
         const WIN_SIZE_W = screen.windowSize.width;
         const WIN_SIZE_H = screen.windowSize.height;
@@ -22,19 +20,19 @@ export class Boost extends Component {
             screen.windowSize = new Size(WIN_SIZE_W, WIN_SIZE_H);
         }
 
-        this.match3Node.active = false;
-
-        this.scheduleOnce(()=> {
-            this.match3Node.active = true;
+        this.scheduleOnce(() => {
+            assetManager.loadBundle("Match3BN", (e, bundle) => {
+                bundle.load("Match3UI", Prefab, (err, prefab: Prefab) => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    let match3Node = instantiate(prefab);
+                    this.node.addChild(match3Node);
+                    match3Node.getComponent(UITransform).setContentSize(G_VIEW_SIZE.clone());
+                })
+            })
         }, 1)
-
-        this.match3Node.active = false;
-
-        this.scheduleOnce(()=> {
-            this.match3Node.active = true;
-        }, 1)
-
-        this.match3Node.getComponent(UITransform).setContentSize(G_VIEW_SIZE.clone());
     }
 
     adapterScreen() {
