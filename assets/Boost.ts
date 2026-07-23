@@ -1,4 +1,4 @@
-import { _decorator, Component, ResolutionPolicy, screen, Size, view } from 'cc';
+import { _decorator, Component, ResolutionPolicy, screen, Size, view, Node, UITransform } from 'cc';
 const { ccclass, property } = _decorator;
 
 /** 
@@ -10,8 +10,31 @@ export const G_VIEW_SIZE = new Size(0, 0);
 
 @ccclass('Boost')
 export class Boost extends Component {
+
+    @property(Node) private match3Node: Node = null;
+
     start() {
-        this.adapterScreen();
+        const WIN_SIZE_W = screen.windowSize.width;
+        const WIN_SIZE_H = screen.windowSize.height;
+        let isScreenWidthLarger = this.adapterScreen();
+        if (isScreenWidthLarger) {
+            screen.windowSize = new Size(WIN_SIZE_W + 1, WIN_SIZE_H);
+            screen.windowSize = new Size(WIN_SIZE_W, WIN_SIZE_H);
+        }
+
+        this.match3Node.active = false;
+
+        this.scheduleOnce(()=> {
+            this.match3Node.active = true;
+        }, 1)
+
+        this.match3Node.active = false;
+
+        this.scheduleOnce(()=> {
+            this.match3Node.active = true;
+        }, 1)
+
+        this.match3Node.getComponent(UITransform).setContentSize(G_VIEW_SIZE.clone());
     }
 
     adapterScreen() {
@@ -38,5 +61,7 @@ export class Boost extends Component {
         }
 
         console.log(`屏幕${isScreenWidthLarger ? "更宽, 高度适配" : "更高, 宽度适配"} 设计分辨率比例下的屏幕尺寸: ${G_VIEW_SIZE.width}x${G_VIEW_SIZE.height}`);
+
+        return isScreenWidthLarger
     }
 }
